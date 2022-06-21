@@ -88,7 +88,13 @@ struct thread
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
-    struct list_elem allelem;           /* List element for all threads list. */
+    struct list_elem allelem;
+    struct lock *wait_on_lock;
+    struct list donations;
+    struct list_elem donation_elem;
+    int init_priority;
+
+               /* List element for all threads list. */
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
@@ -99,7 +105,9 @@ struct thread
 #endif
 
     /* Owned by thread.c. */
-    unsigned magic;                     /* Detects stack overflow. */
+    unsigned magic;
+    int64_t expr;  
+                      /* Detects stack overflow. */
   };
 
 /* If false (default), use round-robin scheduler.
@@ -118,6 +126,7 @@ tid_t thread_create (const char *name, int priority, thread_func *, void *);
 
 void thread_block (void);
 void thread_unblock (struct thread *);
+bool thread_compare_priority (struct list_elem *, struct list_elem *, void *);
 
 struct thread *thread_current (void);
 tid_t thread_tid (void);
